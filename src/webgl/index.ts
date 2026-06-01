@@ -1,5 +1,7 @@
 import frameBufferVSSource from "./frame_buffer_vs.vert?raw"
 import frameBufferFSSource from "./frame_buffer_fs.frag?raw"
+import type { Backdrop } from "../backdrops"
+import { HEIGHT, WIDTH } from "../main"
 
 const FULLSCREEN_FRAMEBUFFER_DATA = {
     posData: new Float32Array([
@@ -24,7 +26,7 @@ const FULLSCREEN_FRAMEBUFFER_DATA = {
 }
 
 export class WebGlEngine {
-    private gl: WebGL2RenderingContext
+    gl: WebGL2RenderingContext
     private frame: {
         buffer: WebGLFramebuffer,
         bufferProgram: WebGLProgram,
@@ -37,23 +39,60 @@ export class WebGlEngine {
         this.gl = this.getContext(canvas)
     }
 
-    private getContext(canvas: HTMLCanvasElement): WebGL2RenderingContext {
+    private getContext(canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("webgl2");
-        if (ctx === null) throw new Error("failed to initialize webgl2. This might be occured due your browser. Go fucking update your browser you caveman!")
+        if (ctx === null) throw new Error("failed to initialize webgl2. This might be occured due your browsers version. Go fucking update your browser you caveman!")
         return ctx
     }
 
-    async init(res: [number, number]) {
+    async init() {
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
-        if (this.useFullscreenFrameBuffer) this.initFrameBuffer(res)
     }
 
-    clear() {
-        this.gl.clearColor(0, 0, 0, 1)
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+    clearScreen() {
+        this.gl.clearColor(0, 0, 0, 0)
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT)
     }
 
-    private createProgram(vertSrc: string, fragSrc: string) {
+    draw(dt: number, backdrops: Backdrop[]) {
+        const drawAll = () => {
+            for (const b of backdrops) b.draw(this, dt)
+        }
+
+        if (this.useFullscreenFrameBuffer && this.frame) {
+            this.gl.bindTexture(this.gl.TEXTURE_2D, null)
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frame.buffer)
+
+            this.gl.disable(this.gl.DEPTH_TEST)
+            this.gl.disable(this.gl.BLEND)
+
+            this.gl.clearColor(0, 0, 0, 0)
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+
+            this.gl.viewport(0, 0, WIDTH, HEIGHT)
+
+            drawAll()
+
+            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
+            this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
+
+            this.gl.useProgram(this.frame.bufferProgram)
+            this.gl.bindVertexArray(this.frame.objectArray)
+
+            this.gl.activeTexture(this.gl.TEXTURE0)
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.frame.texture)
+            this.gl.uniform1i(this.gl.getUniformLocation(this.frame.bufferProgram, "u_tex"), 0)
+
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, 6)
+
+            this.gl.bindVertexArray(null)
+
+        } else {
+            drawAll()
+        }
+    }
+
+    createProgram(vertSrc: string, fragSrc: string) {
         const vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER)
         if (vertexShader === null) throw new Error("Failed to create a vertex shader. Why does this mean? I don't have any fucking idea :D")
         this.gl.shaderSource(vertexShader, vertSrc)
@@ -79,7 +118,7 @@ export class WebGlEngine {
         return shaderProgram
     }
 
-    private initFrameBuffer(res: [number, number]) {
+    initFrameBuffer(res: [number, number]) {
         const fbo = this.gl.createFramebuffer()
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo)
 
@@ -115,6 +154,7 @@ export class WebGlEngine {
 
         const frameBufferProgram = this.createProgram(frameBufferVSSource, frameBufferFSSource)
         this.gl.useProgram(frameBufferProgram)
+
         const frameBufferObjectArray = this.gl.createVertexArray()
         this.gl.bindVertexArray(frameBufferObjectArray)
 
@@ -151,7 +191,7 @@ export class WebGlEngine {
         console.info("Fullscreen frame buffer initialized")
     }
 
-    private setVertexAttribute({
+    setVertexAttribute({
         program, type, location, size, stride = 0, offset = 0, normalized = false
     }: {
         program: WebGLProgram,
@@ -165,5 +205,95 @@ export class WebGlEngine {
         const loc = this.gl.getAttribLocation(program, location)
         this.gl.vertexAttribPointer(loc, size, type, normalized, stride, offset)
         this.gl.enableVertexAttribArray(loc)
+    }
+
+    async createTexture(imagePath: string, textureParameters: {
+        wrap?: "clamp" | "repeat",
+        filter?: "nearest" | "linear"
+    } = {
+            wrap: "clamp",
+            filter: "nearest"
+        }) {
+        const texture = this.gl.createTexture()
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture)
+
+        let target = this.gl.TEXTURE_2D,
+            level = 0,
+            internalFormat = this.gl.RGBA,
+            width = 0,
+            height = 0,
+            border = 0,
+            srcFormat = this.gl.RGBA,
+            srcDataType = this.gl.UNSIGNED_BYTE,
+            pixelData = new Uint8Array([0, 0, 0, 0])
+
+        // fallback
+        this.gl.texImage2D(
+            target,
+            level,
+            internalFormat,
+            width,
+            height,
+            border,
+            srcFormat,
+            srcDataType,
+            pixelData
+        )
+
+        // load texture
+        const load = async () => {
+
+            const res = await fetch(imagePath);
+            const blob = await res.blob();
+            const bitmap = await createImageBitmap(blob);
+
+            const [width, height] = [bitmap.width, bitmap.height];
+
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+
+            this.gl.texImage2D(
+                this.gl.TEXTURE_2D,
+                0,
+                this.gl.RGBA,
+                width,
+                height,
+                0,
+                this.gl.RGBA,
+                this.gl.UNSIGNED_BYTE,
+                bitmap,
+            );
+
+            const wrap = textureParameters && textureParameters.wrap === "repeat" ? this.gl.REPEAT : this.gl.CLAMP_TO_EDGE;
+            const filter = textureParameters && textureParameters.filter === "linear" ? this.gl.LINEAR : this.gl.NEAREST;
+
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, filter);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, filter);
+
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, wrap)
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, wrap)
+
+            this.gl.generateMipmap(this.gl.TEXTURE_2D);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+        }
+
+        await load()
+
+        return texture
+    }
+
+    bindRuntime({
+        buffer, program, data, location, size = 0
+    }: {
+        buffer: WebGLBuffer,
+        program: WebGLProgram,
+        data: Float32Array<ArrayBuffer>,
+        location: string,
+        size: number,
+    }) {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.DYNAMIC_DRAW)
+        this.setVertexAttribute({
+            program, type: this.gl.FLOAT, location, size
+        })
     }
 }

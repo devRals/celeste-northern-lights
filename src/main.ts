@@ -1,10 +1,16 @@
 import "./style.css"
+
+import { NorthernLights } from "./backdrops/northern_lights";
 import { WebGlEngine as Engine } from "./webgl"
 
+export const RESOULUTION: [number, number] = [320, 180] as const
+export const [WIDTH, HEIGHT] = RESOULUTION
+
 const appContainer = document.getElementById("app")!;
+const norther_lights_effect = new NorthernLights()
 let engine: Engine
 let canvas: HTMLCanvasElement
-const RESOLUTION: [number, number] = [320, 180] as const
+
 
 async function initContent() {
     const _canvas = document.createElement("canvas")
@@ -21,13 +27,29 @@ async function initContent() {
         console.error(event.reason)
     })
 
+    window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+
+        engine.gl.viewport(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        )
+    })
+
     appContainer.append(canvas)
 }
 
 async function initEngine() {
     const _engine = new Engine(canvas)
+
+    await _engine.init()
     _engine.useFullscreenFrameBuffer = true
-    await _engine.init(RESOLUTION)
+    _engine.initFrameBuffer(RESOULUTION)
+
+    await norther_lights_effect.init(_engine)
 
     engine = _engine
 }
@@ -39,7 +61,13 @@ async function init() {
     console.info("initialization completed")
 }
 
+
+const dt = 1 / 60
 function render() {
+
+    engine.clearScreen()
+    engine.draw(dt, [norther_lights_effect])
+    requestAnimationFrame(render)
 }
 
 function fatal(error: unknown): never {
@@ -61,7 +89,7 @@ function fatal(error: unknown): never {
 
 try {
     await init()
-    // render()
+    render()
 } catch (error) {
     fatal(error)
 }
