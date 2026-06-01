@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["main"]
 
+env:
+  NODE_ENV: production
+
 jobs:
   build-and-deploy:
     permissions:
@@ -22,7 +25,9 @@ jobs:
         uses: pnpm/action-setup@v6.0.8
 
       - name: Build project
-        run: NODE_ENV=production pnpm build
+        run: |
+          pnpm install
+          pnpm build
 
       - name: Deploy the project
         uses: peaceiris/actions-gh-pages@v4
