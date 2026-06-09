@@ -1,0 +1,29 @@
+{
+    "name": "@devrals/backdrops",
+    "version": "0.1.0",
+    "type": "module",
+    "packageManager": "pnpm@10.29.2",
+    "license": "MIT",
+    "description": "A couple sets of backgrounds based of @devrals/webgl-engine",
+    "author": {
+        "name": "devRals",
+        "url": "https://devrals.github.io/"
+    },
+    "scripts": {
+        "build": "vite build"
+    },
+    "keywords": [
+        "backdrops",
+        "backgrounds"
+    ],
+    "dependencies": {
+        "@devrals/math": "workspace:*",
+        "@devrals/webgl-engine": "workspace:*"
+    },
+    "exports": {
+        "./northern-lights": {
+            "types": "./dist/src/northern_lights/index.d.ts",
+            "default": "./dist/northern_lights.js"
+        }
+    }
+}

@@ -1,7 +1,12 @@
 import frameBufferVSSource from "./frame_buffer_vs.vert?raw"
 import frameBufferFSSource from "./frame_buffer_fs.frag?raw"
-import type { Backdrop } from "../backdrops"
-import { HEIGHT, WIDTH } from "../main"
+
+export interface Backdrop {
+    init(engine: WebGlEngine): Promise<void>,
+    draw(engine: WebGlEngine, dt: number): void
+}
+
+export type Resolution = [number, number]
 
 const FULLSCREEN_FRAMEBUFFER_DATA = {
     posData: new Float32Array([
@@ -33,7 +38,10 @@ export class WebGlEngine {
         texture: WebGLTexture
         objectArray: WebGLVertexArrayObject
     } | null = null
-    useFullscreenFrameBuffer = false
+    fullscreenFrameBufferSettings = {
+        enabled: false,
+        resolution: [0, 0]
+    }
 
     constructor(canvas: HTMLCanvasElement) {
         this.gl = this.getContext(canvas)
@@ -59,7 +67,7 @@ export class WebGlEngine {
             for (const b of backdrops) b.draw(this, dt)
         }
 
-        if (this.useFullscreenFrameBuffer && this.frame) {
+        if (this.fullscreenFrameBufferSettings.enabled && this.frame) {
             this.gl.bindTexture(this.gl.TEXTURE_2D, null)
             this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.frame.buffer)
 
@@ -69,7 +77,8 @@ export class WebGlEngine {
             this.gl.clearColor(0, 0, 0, 0)
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-            this.gl.viewport(0, 0, WIDTH, HEIGHT)
+            const [width, height] = this.fullscreenFrameBufferSettings.resolution
+            this.gl.viewport(0, 0, width, height)
 
             drawAll()
 
@@ -118,7 +127,7 @@ export class WebGlEngine {
         return shaderProgram
     }
 
-    initFrameBuffer(res: [number, number]) {
+    initFrameBuffer(res: Resolution) {
         const fbo = this.gl.createFramebuffer()
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo)
 

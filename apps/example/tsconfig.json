@@ -1,0 +1,17 @@
+{
+    "extends": [
+        "../../tsconfig.base.json"
+    ],
+    "compilerOptions": {
+        "target": "es2023",
+        "module": "esnext",
+        "lib": [
+            "ES2023",
+            "DOM"
+        ],
+        "moduleResolution": "bundler",
+    },
+    "include": [
+        "src",
+    ]
+}

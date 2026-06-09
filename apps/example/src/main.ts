@@ -1,10 +1,9 @@
 import "./style.css"
 
-import { NorthernLights } from "./backdrops/northern_lights";
-import { WebGlEngine as Engine } from "./webgl"
+import NorthernLights, { RENDER_RESOLUTION } from "@devrals/backdrops/northern-lights";
+import { WebGlEngine as Engine } from "@devrals/webgl-engine"
 
-export const RESOULUTION: [number, number] = [320, 180] as const
-export const [WIDTH, HEIGHT] = RESOULUTION
+export const [WIDTH, HEIGHT] = RENDER_RESOLUTION
 
 const appContainer = document.getElementById("app")!;
 const norther_lights_effect = new NorthernLights()
@@ -46,8 +45,11 @@ async function initEngine() {
     const _engine = new Engine(canvas)
 
     await _engine.init()
-    _engine.useFullscreenFrameBuffer = true
-    _engine.initFrameBuffer(RESOULUTION)
+    _engine.fullscreenFrameBufferSettings = {
+        enabled: true,
+        resolution: RENDER_RESOLUTION
+    }
+    _engine.initFrameBuffer(RENDER_RESOLUTION)
 
     await norther_lights_effect.init(_engine)
 

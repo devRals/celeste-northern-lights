@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "types": [
+            "vite/client"
+        ],
+        "allowJs": true,
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "erasableSyntaxOnly": true,
+        "noFallthroughCasesInSwitch": true,
+        "declaration": true,
+        "strict": true,
+        "alwaysStrict": true,
+    },
+}

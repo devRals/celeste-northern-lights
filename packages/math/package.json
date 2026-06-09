@@ -1,0 +1,25 @@
+{
+    "name": "@devrals/math",
+    "version": "0.1.0",
+    "type": "module",
+    "packageManager": "pnpm@10.29.2",
+    "license": "MIT",
+    "description": "Vector2/3 Utils",
+    "author": {
+        "name": "devRals",
+        "url": "https://devrals.github.io/"
+    },
+    "scripts": {
+        "build": "vite build"
+    },
+    "keywords": [
+        "math",
+        "vec2"
+    ],
+    "exports": {
+        ".": {
+            "types": "./dist/src/index.d.ts",
+            "default": "./dist/math.js"
+        }
+    }
+}

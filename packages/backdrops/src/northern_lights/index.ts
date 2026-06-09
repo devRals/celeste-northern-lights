@@ -3,16 +3,17 @@
 // to game they don't own!
 // Remember that this is just a fan remake
 
-import { approach, chooseRand, lerp, mul, randRange, Vec2, Vec3, type VertexPositionColorTexture } from "../../utils"
-import { WIDTH, HEIGHT } from "../../main"
-import type { WebGlEngine } from "../../webgl"
+import { approach, chooseRand, lerp, mul, randRange, Vec2, Vec3, type VertexPositionColorTexture } from "@devrals/math"
+import type { WebGlEngine, Resolution, Backdrop } from "@devrals/webgl-engine"
 import northerLightsTexturePath from "./northernlights.png"
 
 import vertSrc from "./vertex.vert?raw"
 import fragSrc from "./fragment.frag?raw"
-import type { Backdrop } from ".."
 
-export class NorthernLights implements Backdrop {
+export const RENDER_RESOLUTION: Resolution = [320, 180]
+const [WIDTH, HEIGHT] = RENDER_RESOLUTION
+
+export default class NorthernLights implements Backdrop {
     strands: Strand[]
     particles: Particle[]
     timer: number = 0
