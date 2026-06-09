@@ -5,6 +5,9 @@
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
     "description": "A couple sets of backgrounds based of @devrals/webgl-engine",
+    "files": [
+        "dist"
+    ],
     "author": {
         "name": "devRals",
         "url": "https://devrals.github.io/"
@@ -17,8 +20,8 @@
         "backgrounds"
     ],
     "dependencies": {
-        "@devrals/math": "workspace:*",
-        "@devrals/webgl-engine": "workspace:*"
+        "@devrals/math": "^0.1.0",
+        "@devrals/webgl-engine": "^0.1.0"
     },
     "exports": {
         "./northern-lights": {

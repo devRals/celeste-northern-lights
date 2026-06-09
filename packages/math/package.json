@@ -5,6 +5,9 @@
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
     "description": "Vector2/3 Utils",
+    "files": [
+        "dist"
+    ],
     "author": {
         "name": "devRals",
         "url": "https://devrals.github.io/"
