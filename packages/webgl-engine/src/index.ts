@@ -2,8 +2,10 @@ import frameBufferVSSource from "./frame_buffer_vs.vert?raw"
 import frameBufferFSSource from "./frame_buffer_fs.frag?raw"
 
 export interface Backdrop {
+    getResolution(): Resolution,
     init(engine: WebGlEngine): Promise<void>,
     draw(engine: WebGlEngine, dt: number): void
+    destroy?(engine: WebGlEngine): void
 }
 
 export type Resolution = [number, number]
@@ -55,10 +57,12 @@ export class WebGlEngine {
 
     async init() {
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
+
+        if (this.fullscreenFrameBufferSettings.enabled) this.initFrameBuffer()
     }
 
-    clearScreen() {
-        this.gl.clearColor(0, 0, 0, 0)
+    clearScreen(red = 0, green = 0, blue = 0, alpha = 0) {
+        this.gl.clearColor(red, green, blue, alpha)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT)
     }
 
@@ -101,6 +105,18 @@ export class WebGlEngine {
         }
     }
 
+    destroyFrameBuffer() {
+        if (!this.frame) return
+
+        this.gl.deleteFramebuffer(this.frame.buffer)
+        this.gl.deleteTexture(this.frame.texture)
+        this.gl.deleteProgram(this.frame.bufferProgram)
+        this.gl.deleteVertexArray(this.frame.objectArray)
+
+        this.frame = null
+        this.fullscreenFrameBufferSettings.enabled = false
+    }
+
     createProgram(vertSrc: string, fragSrc: string) {
         const vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER)
         if (vertexShader === null) throw new Error("Failed to create a vertex shader. Why does this mean? I don't have any fucking idea :D")
@@ -127,12 +143,14 @@ export class WebGlEngine {
         return shaderProgram
     }
 
-    initFrameBuffer(res: Resolution) {
+    initFrameBuffer() {
         const fbo = this.gl.createFramebuffer()
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo)
 
         const frameBufferTexture = this.gl.createTexture()
         this.gl.bindTexture(this.gl.TEXTURE_2D, frameBufferTexture)
+
+        const res = this.fullscreenFrameBufferSettings.resolution
 
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
