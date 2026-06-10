@@ -44,13 +44,12 @@ async function initContent() {
 async function initEngine() {
     const _engine = new Engine(canvas)
 
-    await _engine.init()
     _engine.fullscreenFrameBufferSettings = {
         enabled: true,
         resolution: RENDER_RESOLUTION
     }
-    _engine.initFrameBuffer(RENDER_RESOLUTION)
 
+    await _engine.init()
     await norther_lights_effect.init(_engine)
 
     engine = _engine

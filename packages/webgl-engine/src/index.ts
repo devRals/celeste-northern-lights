@@ -2,13 +2,15 @@ import frameBufferVSSource from "./frame_buffer_vs.vert?raw"
 import frameBufferFSSource from "./frame_buffer_fs.frag?raw"
 
 export interface Backdrop {
-    getResolution(): Resolution,
     init(engine: WebGlEngine): Promise<void>,
     draw(engine: WebGlEngine, dt: number): void
     destroy?(engine: WebGlEngine): void
 }
 
-export type Resolution = [number, number]
+export type Resolution = {
+    width: number,
+    heigth: number
+}
 
 const FULLSCREEN_FRAMEBUFFER_DATA = {
     posData: new Float32Array([
@@ -32,6 +34,16 @@ const FULLSCREEN_FRAMEBUFFER_DATA = {
     ])
 }
 
+type FullscreenFrameBufferSettings = {
+    enabled: boolean,
+    resolution: Resolution
+}
+
+type TextureParameterOptions = {
+    wrap?: "clamp" | "repeat",
+    filter?: "nearest" | "linear"
+}
+
 export class WebGlEngine {
     gl: WebGL2RenderingContext
     private frame: {
@@ -40,9 +52,9 @@ export class WebGlEngine {
         texture: WebGLTexture
         objectArray: WebGLVertexArrayObject
     } | null = null
-    fullscreenFrameBufferSettings = {
+    fullscreenFrameBufferSettings: FullscreenFrameBufferSettings = {
         enabled: false,
-        resolution: [0, 0]
+        resolution: { width: 0, heigth: 0 }
     }
 
     constructor(canvas: HTMLCanvasElement) {
@@ -81,8 +93,8 @@ export class WebGlEngine {
             this.gl.clearColor(0, 0, 0, 0)
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-            const [width, height] = this.fullscreenFrameBufferSettings.resolution
-            this.gl.viewport(0, 0, width, height)
+            const { width, heigth } = this.fullscreenFrameBufferSettings.resolution
+            this.gl.viewport(0, 0, width, heigth)
 
             drawAll()
 
@@ -143,21 +155,21 @@ export class WebGlEngine {
         return shaderProgram
     }
 
-    initFrameBuffer() {
+    private initFrameBuffer() {
         const fbo = this.gl.createFramebuffer()
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fbo)
 
         const frameBufferTexture = this.gl.createTexture()
         this.gl.bindTexture(this.gl.TEXTURE_2D, frameBufferTexture)
 
-        const res = this.fullscreenFrameBufferSettings.resolution
+        const { width, heigth } = this.fullscreenFrameBufferSettings.resolution
 
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
             0,
             this.gl.RGBA,
-            res[0],
-            res[1],
+            width,
+            heigth,
             0,
             this.gl.RGBA,
             this.gl.UNSIGNED_BYTE,
@@ -234,10 +246,9 @@ export class WebGlEngine {
         this.gl.enableVertexAttribArray(loc)
     }
 
-    async createTexture(imagePath: string, textureParameters: {
-        wrap?: "clamp" | "repeat",
-        filter?: "nearest" | "linear"
-    } = {
+    async createTexture(
+        imagePath: string,
+        textureParameters: TextureParameterOptions = {
             wrap: "clamp",
             filter: "nearest"
         }) {
@@ -308,6 +319,10 @@ export class WebGlEngine {
         return texture
     }
 
+    /**
+     * Using for binding data that is updated during render time
+     * Doesn't recommended to use it with a rendering tech that uses so many vertices
+     */
     bindRuntime({
         buffer, program, data, location, size = 0
     }: {

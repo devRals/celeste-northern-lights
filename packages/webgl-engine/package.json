@@ -1,10 +1,11 @@
 {
     "name": "@devrals/webgl-engine",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "type": "module",
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
     "description": "Simplefied way of using webgl with a engine class.",
+    "repository": "https://github.com/devRals/webgl-backdrops/",
     "files": [
         "dist"
     ],
