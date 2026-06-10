@@ -4,16 +4,18 @@
 // Remember that this is just a fan remake
 
 import { approach, chooseRand, lerp, mul, randRange, Vec2, Vec3, type VertexPositionColorTexture } from "@devrals/math"
-import type { WebGlEngine, Resolution, Backdrop } from "@devrals/webgl-engine"
+import type { Resolution, Backdrop, WebGlEngine } from "@devrals/webgl-engine"
 import northerLightsTexturePath from "./northernlights.png"
 
 import vertSrc from "./vertex.vert?raw"
 import fragSrc from "./fragment.frag?raw"
 
-export const RENDER_RESOLUTION: Resolution = [320, 180]
-const [WIDTH, HEIGHT] = RENDER_RESOLUTION
+export default class NorthernLights implements Backdrop<WebGlEngine> {
+    static resolution: Resolution = {
+        width: 320,
+        height: 180
+    }
 
-export default class NorthernLights implements Backdrop {
     strands: Strand[]
     particles: Particle[]
     timer: number = 0
@@ -36,8 +38,9 @@ export default class NorthernLights implements Backdrop {
 
         let particles: Particle[] = []
         for (let i = 0; i < 50; i++) {
+            const { width, height } = NorthernLights.resolution
             const particle: Particle = {
-                pos: new Vec2(randRange(0, WIDTH), randRange(0, HEIGHT)),
+                pos: new Vec2(randRange(0, width), randRange(0, height)),
                 speed: randRange(4, 14),
                 color: chooseRand(NorthernLights.colors)
             }
@@ -69,9 +72,9 @@ export default class NorthernLights implements Backdrop {
             }
         }
         for (let i = 0; i < this.particles.length; i++) {
-            if (this.particles[i].pos.y > HEIGHT) {
+            if (this.particles[i].pos.y > NorthernLights.resolution.width) {
                 this.particles[i].pos.y = -3
-                this.particles[i].pos.x = randRange(0, WIDTH)
+                this.particles[i].pos.x = randRange(0, NorthernLights.resolution.height)
             } else {
                 this.particles[i].pos.y += this.particles[i].speed * dt
             }
@@ -144,7 +147,8 @@ export default class NorthernLights implements Backdrop {
         gl.useProgram(this.webglProgram)
 
         const u_resolution = gl.getUniformLocation(this.webglProgram, "u_resolution")
-        gl.uniform2f(u_resolution, WIDTH, HEIGHT)
+        const { width, height } = NorthernLights.resolution
+        gl.uniform2f(u_resolution, width, height)
 
         this.update(dt)
         this.beforeRender()
@@ -188,6 +192,26 @@ export default class NorthernLights implements Backdrop {
         gl.drawArrays(gl.TRIANGLES, 0, this.verts.length)
 
         gl.bindTexture(gl.TEXTURE_2D, null)
+    }
+
+    destroy(engine: WebGlEngine): void {
+        const gl = engine.gl
+
+        const clearBuffer = (buffers: Record<string, WebGLBuffer>) => {
+            for (const [key, buffer] of Object.entries(buffers)) {
+                gl.deleteBuffer(buffer)
+                buffers[key] = 0
+            }
+        }
+
+        gl.deleteProgram(this.webglProgram)
+        for (const [key, texture] of Object.entries(this.textures)) {
+            gl.deleteTexture(texture)
+            this.textures[key] = 0
+        }
+        clearBuffer(this.buffers.auroa)
+        clearBuffer(this.buffers.particles)
+        gl.deleteVertexArray(this.buffers.vao)
     }
 }
 

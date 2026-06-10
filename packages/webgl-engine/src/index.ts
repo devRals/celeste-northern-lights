@@ -1,16 +1,20 @@
 import frameBufferVSSource from "./frame_buffer_vs.vert?raw"
 import frameBufferFSSource from "./frame_buffer_fs.frag?raw"
 
-export interface Backdrop {
-    init(engine: WebGlEngine): Promise<void>,
-    draw(engine: WebGlEngine, dt: number): void
-    destroy?(engine: WebGlEngine): void
+type DrawContext = CanvasRenderingContext2D | WebGL2RenderingContext | WebGlEngine
+
+export interface Backdrop<Renderer extends DrawContext> {
+    init(ctx: Renderer): Promise<void>,
+    draw(ctx: Renderer, dt: number): void
+    update(dt: number): void
+    destroy?(ctx: Renderer): void
 }
 
 export type Resolution = {
     width: number,
-    heigth: number
+    height: number
 }
+
 
 const FULLSCREEN_FRAMEBUFFER_DATA = {
     posData: new Float32Array([
@@ -54,7 +58,7 @@ export class WebGlEngine {
     } | null = null
     fullscreenFrameBufferSettings: FullscreenFrameBufferSettings = {
         enabled: false,
-        resolution: { width: 0, heigth: 0 }
+        resolution: { width: 0, height: 0 }
     }
 
     constructor(canvas: HTMLCanvasElement) {
@@ -62,8 +66,11 @@ export class WebGlEngine {
     }
 
     private getContext(canvas: HTMLCanvasElement) {
-        const ctx = canvas.getContext("webgl2");
-        if (ctx === null) throw new Error("failed to initialize webgl2. This might be occured due your browsers version. Go fucking update your browser you caveman!")
+        const ctx = canvas.getContext("webgl2", {
+            alpha: true,
+            powerPreference: "low-power"
+        });
+        if (!ctx) throw new Error("failed to initialize webgl2. This might be occured due your browsers version. Go fucking update your browser you caveman!")
         return ctx
     }
 
@@ -78,7 +85,7 @@ export class WebGlEngine {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT)
     }
 
-    draw(dt: number, backdrops: Backdrop[]) {
+    draw(dt: number, backdrops: Backdrop<WebGlEngine>[]) {
         const drawAll = () => {
             for (const b of backdrops) b.draw(this, dt)
         }
@@ -93,8 +100,8 @@ export class WebGlEngine {
             this.gl.clearColor(0, 0, 0, 0)
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-            const { width, heigth } = this.fullscreenFrameBufferSettings.resolution
-            this.gl.viewport(0, 0, width, heigth)
+            const { width, height } = this.fullscreenFrameBufferSettings.resolution
+            this.gl.viewport(0, 0, width, height)
 
             drawAll()
 
@@ -162,14 +169,14 @@ export class WebGlEngine {
         const frameBufferTexture = this.gl.createTexture()
         this.gl.bindTexture(this.gl.TEXTURE_2D, frameBufferTexture)
 
-        const { width, heigth } = this.fullscreenFrameBufferSettings.resolution
+        const { width, height } = this.fullscreenFrameBufferSettings.resolution
 
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
             0,
             this.gl.RGBA,
             width,
-            heigth,
+            height,
             0,
             this.gl.RGBA,
             this.gl.UNSIGNED_BYTE,

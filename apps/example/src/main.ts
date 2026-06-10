@@ -1,21 +1,22 @@
 import "./style.css"
 
-import NorthernLights, { RENDER_RESOLUTION } from "@devrals/backdrops/northern-lights";
-import { WebGlEngine as Engine } from "@devrals/webgl-engine"
-
-export const [WIDTH, HEIGHT] = RENDER_RESOLUTION
+import DreamStars from "@devrals/backdrops/dream-stars"
 
 const appContainer = document.getElementById("app")!;
-const norther_lights_effect = new NorthernLights()
-let engine: Engine
+const stars_effect = new DreamStars()
 let canvas: HTMLCanvasElement
+let ctx: CanvasRenderingContext2D
+let animaationId: number
 
 
 async function initContent() {
     const _canvas = document.createElement("canvas")
     _canvas.id = "background"
-    _canvas.width = window.innerWidth
-    _canvas.height = window.innerHeight
+    _canvas.width = DreamStars.resolution.width
+    _canvas.height = DreamStars.resolution.height
+    _canvas.style.imageRendering = "pixelated"
+    _canvas.style.width = "100vw"
+    _canvas.style.height = "100vh"
 
     canvas = _canvas
     window.addEventListener("error", (event) => {
@@ -26,33 +27,15 @@ async function initContent() {
         console.error(event.reason)
     })
 
-    window.addEventListener("resize", () => {
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
-
-        engine.gl.viewport(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        )
-    })
-
     appContainer.append(canvas)
 }
 
 async function initEngine() {
-    const _engine = new Engine(canvas)
+    const _ctx = canvas.getContext("2d")
+    if (!_ctx) throw new Error("2d draw context init failed ")
+    ctx = _ctx
 
-    _engine.fullscreenFrameBufferSettings = {
-        enabled: true,
-        resolution: RENDER_RESOLUTION
-    }
-
-    await _engine.init()
-    await norther_lights_effect.init(_engine)
-
-    engine = _engine
+    await stars_effect.init()
 }
 
 async function init() {
@@ -63,15 +46,16 @@ async function init() {
 }
 
 
-const dt = 1 / 60
 function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    stars_effect.update(1 / 60)
+    stars_effect.draw(ctx)
 
-    engine.clearScreen()
-    engine.draw(dt, [norther_lights_effect])
-    requestAnimationFrame(render)
+    animaationId = requestAnimationFrame(render)
 }
 
 function fatal(error: unknown): never {
+    cancelAnimationFrame(animaationId)
     console.error(error)
 
     document.body.innerHTML = `
