@@ -75,7 +75,7 @@ export default class NorthernLights implements Backdrop<WebGlEngine> {
         for (let i = 0; i < this.particles.length; i++) {
             if (this.particles[i].pos.y > NorthernLights.resolution.width) {
                 this.particles[i].pos.y = -3
-                this.particles[i].pos.x = randRange(0, NorthernLights.resolution.height)
+                this.particles[i].pos.x = randRange(0, NorthernLights.resolution.width)
             } else {
                 this.particles[i].pos.y += this.particles[i].speed * dt
             }

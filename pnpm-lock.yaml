@@ -34,17 +34,23 @@ importers:
   packages/backdrops:
     dependencies:
       '@devrals/math':
-        specifier: workspace:*
-        version: link:../math
+        specifier: ^0.1.2
+        version: 0.1.2
       '@devrals/webgl-engine':
-        specifier: workspace:*
-        version: link:../webgl-engine
+        specifier: ^0.1.4
+        version: 0.1.4
 
   packages/math: {}
 
   packages/webgl-engine: {}
 
 packages:
+
+  '@devrals/math@0.1.2':
+    resolution: {integrity: sha512-qPgIF30+B9UePjvlonGRmY76qKjiQhSzltEOzlH2Ttmc+KU00quALcEYvxyUv40NAyr3hPot0cR2308SkW9Otw==}
+
+  '@devrals/webgl-engine@0.1.4':
+    resolution: {integrity: sha512-kJNGi3TOoLPhcB4paFL8izu41oHTuTD385bC9dNr+W+CcxOXwrNkmGnciTjxc7aTbpZPhYx3Q6r3dq5qcL0mVQ==}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -492,6 +498,10 @@ packages:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
 
 snapshots:
+
+  '@devrals/math@0.1.2': {}
+
+  '@devrals/webgl-engine@0.1.4': {}
 
   '@emnapi/core@1.10.0':
     dependencies:

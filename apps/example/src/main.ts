@@ -1,19 +1,19 @@
 import "./style.css"
 
-import DreamStars from "@devrals/backdrops/dream-stars"
+import NorthernLights from "@devrals/backdrops/northern-lights"
+import { WebGlEngine } from "@devrals/webgl-engine"
 
 const appContainer = document.getElementById("app")!;
-const stars_effect = new DreamStars()
+const northern_lights = new NorthernLights()
 let canvas: HTMLCanvasElement
-let ctx: CanvasRenderingContext2D
-let animaationId: number
+let engine: WebGlEngine;
 
 
 async function initContent() {
     const _canvas = document.createElement("canvas")
     _canvas.id = "background"
-    _canvas.width = DreamStars.resolution.width
-    _canvas.height = DreamStars.resolution.height
+    _canvas.width = NorthernLights.resolution.width
+    _canvas.height = NorthernLights.resolution.height
     _canvas.style.imageRendering = "pixelated"
     _canvas.style.width = "100vw"
     _canvas.style.height = "100vh"
@@ -30,12 +30,16 @@ async function initContent() {
     appContainer.append(canvas)
 }
 
+const DRAW_TIME = 1 / 10
 async function initEngine() {
-    const _ctx = canvas.getContext("2d")
-    if (!_ctx) throw new Error("2d draw context init failed ")
-    ctx = _ctx
+    engine = new WebGlEngine(canvas)
+    engine.fullscreenFrameBufferSettings = {
+        enabled: true,
+        resolution: NorthernLights.resolution
+    }
+    await engine.init()
+    await northern_lights.init(engine)
 
-    await stars_effect.init()
 }
 
 async function init() {
@@ -46,16 +50,18 @@ async function init() {
 }
 
 
+let animationId: number;
 function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    stars_effect.update(1 / 60)
-    stars_effect.draw(ctx)
-
-    animaationId = requestAnimationFrame(render)
+    engine.clearScreen()
+    engine.draw(DRAW_TIME, (dt) =>
+        northern_lights.draw(engine, dt))
+    animationId = requestAnimationFrame(render)
 }
 
 function fatal(error: unknown): never {
-    cancelAnimationFrame(animaationId)
+    cancelAnimationFrame(animationId)
+    northern_lights.destroy(engine)
+    engine.destroyFrameBuffer()
     console.error(error)
 
     document.body.innerHTML = `
