@@ -1,15 +1,6 @@
 import frameBufferVSSource from "./frame_buffer_vs.vert?raw"
 import frameBufferFSSource from "./frame_buffer_fs.frag?raw"
 
-type DrawContext = CanvasRenderingContext2D | WebGL2RenderingContext | WebGlEngine
-
-export interface Backdrop<Renderer extends DrawContext> {
-    init(ctx: Renderer): Promise<void>,
-    draw(ctx: Renderer, dt: number): void
-    update(dt: number): void
-    destroy?(ctx: Renderer): void
-}
-
 export type Resolution = {
     width: number,
     height: number
@@ -85,10 +76,7 @@ export class WebGlEngine {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT)
     }
 
-    draw(dt: number, backdrops: Backdrop<WebGlEngine>[]) {
-        const drawAll = () => {
-            for (const b of backdrops) b.draw(this, dt)
-        }
+    draw<T>(drawCtx: T, drawCallback: (drawCtx: T) => void) {
 
         if (this.fullscreenFrameBufferSettings.enabled && this.frame) {
             this.gl.bindTexture(this.gl.TEXTURE_2D, null)
@@ -103,7 +91,7 @@ export class WebGlEngine {
             const { width, height } = this.fullscreenFrameBufferSettings.resolution
             this.gl.viewport(0, 0, width, height)
 
-            drawAll()
+            drawCallback(drawCtx)
 
             this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
             this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
@@ -120,7 +108,7 @@ export class WebGlEngine {
             this.gl.bindVertexArray(null)
 
         } else {
-            drawAll()
+            drawCallback(drawCtx)
         }
     }
 

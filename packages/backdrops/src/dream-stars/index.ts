@@ -1,5 +1,6 @@
 import { chooseRand, randRange, Vec2, Vec3 } from "@devrals/math";
-import type { Backdrop, Resolution } from "@devrals/webgl-engine";
+import type { Resolution } from "@devrals/webgl-engine";
+import type { Backdrop } from "../index.js";
 
 import { textureSets } from "./textures/index.js"
 
@@ -31,11 +32,11 @@ export default class DreamStars implements Backdrop<CanvasRenderingContext2D> {
 
     constructor(count = 100) {
         this.stars = new Array(count)
-        const { width, height: heigth } = DreamStars.resolution
+        const { width, height } = DreamStars.resolution
 
         for (let i = 0; i < this.stars.length; i++)
             this.stars[i] = {
-                position: new Vec2(randRange(0, width), randRange(0, heigth)),
+                position: new Vec2(randRange(0, width), randRange(0, height)),
                 rate: 2.0 + Math.random() * 2.0,
                 timer: randRange(0, 6.2831855),
                 textureSet: chooseRand(["a", "b", "c"])

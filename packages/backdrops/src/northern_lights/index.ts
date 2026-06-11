@@ -4,7 +4,8 @@
 // Remember that this is just a fan remake
 
 import { approach, chooseRand, lerp, mul, randRange, Vec2, Vec3, type VertexPositionColorTexture } from "@devrals/math"
-import type { Resolution, Backdrop, WebGlEngine } from "@devrals/webgl-engine"
+import type { Resolution, WebGlEngine } from "@devrals/webgl-engine"
+import type { Backdrop } from "../index.js"
 import northerLightsTexturePath from "./northernlights.png"
 
 import vertSrc from "./vertex.vert?raw"

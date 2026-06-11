@@ -1,6 +1,6 @@
 {
     "name": "@devrals/backdrops",
-    "version": "0.1.1",
+    "version": "0.2.1",
     "type": "module",
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
@@ -20,10 +20,14 @@
         "backgrounds"
     ],
     "dependencies": {
-        "@devrals/math": "workspace:*",
-        "@devrals/webgl-engine": "workspace:*"
+        "@devrals/math": "^0.1.2",
+        "@devrals/webgl-engine": "^0.1.4"
     },
     "exports": {
+        ".": {
+            "types": "./dist/src/index.d.ts",
+            "default": "./dist/index.js"
+        },
         "./northern-lights": {
             "types": "./dist/src/northern_lights/index.d.ts",
             "default": "./dist/northern_lights.js"
