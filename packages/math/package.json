@@ -1,6 +1,6 @@
 {
     "name": "@devrals/math",
-    "version": "0.1.2",
+    "version": "0.2.1",
     "type": "module",
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
@@ -13,11 +13,13 @@
         "url": "https://devrals.github.io/"
     },
     "scripts": {
-        "build": "vite build"
+        "build": "vite build",
+        "test": "vitest"
     },
     "keywords": [
         "math",
-        "vec2"
+        "vec2",
+        "vec3"
     ],
     "exports": {
         ".": {

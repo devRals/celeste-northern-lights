@@ -4,7 +4,7 @@
     "type": "module",
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
-    "description": "A couple sets of backgrounds based of @devrals/webgl-engine",
+    "description": "A couple sets of backgrounds based of @devrals/webgl-engine and three.js",
     "files": [
         "dist"
     ],
@@ -20,7 +20,7 @@
         "backgrounds"
     ],
     "dependencies": {
-        "@devrals/math": "^0.1.2",
+        "@devrals/math": "^0.2.1",
         "@devrals/webgl-engine": "^0.1.4"
     },
     "exports": {
@@ -35,6 +35,10 @@
         "./dream-stars": {
             "types": "./dist/src/dream-stars/index.d.ts",
             "default": "./dist/dream-stars.js"
+        },
+        "./floating-in-space": {
+            "types": "./dist/src/floating-in-space/index.d.ts",
+            "import": "./dist/floating-in-space.js"
         }
     }
 }

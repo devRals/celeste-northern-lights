@@ -11,8 +11,12 @@ export class Vec2 {
         return new Vec2(v, v)
     }
 
-    static empty() {
+    static zero() {
         return new Vec2(0, 0)
+    }
+
+    static one() {
+        return new Vec2(1, 1)
     }
 
     add(other: Vec2 | number) {
@@ -40,6 +44,25 @@ export class Vec2 {
         return this
     }
 
+    /**
+     * @returns Dot product of `this` and `other`
+     */
+    dot(other: Vec2) {
+        return this.x * other.x +
+            this.y * other.y
+    }
+
+    /**
+     * @returns the cross product of `this` and `other`
+     */
+    cross(other: Vec2) {
+        return this.x * other.y -
+            this.y * other.x
+    }
+
+    /**
+     * `cb` applied to the `x` and `y`
+     */
     map(cb: (v: number) => number) {
         this.x = cb(this.x)
         this.y = cb(this.y)
@@ -47,6 +70,9 @@ export class Vec2 {
         return this
     }
 
+    /**
+     * @returns \[`x`, `y`, 0\]
+     */
     toArr(): [number, number, number] {
         return [
             this.x,
@@ -54,13 +80,58 @@ export class Vec2 {
             0
         ]
     }
+
+    /**
+     * @returns magnitude of the vector
+     */
+    length() {
+        return Math.hypot(this.x, this.y)
+    }
+
+    /**
+     * Consider using this over `length` if you want faster calculations
+     * @returns squared magnitude of the vector
+     */
+    lengthSquared() {
+        return this.x * this.x + this.y * this.y
+    }
+
+    /**
+     * Normalizes the vector
+     * @example
+     *  const vec = new Vec2(5, 0)
+     *  vec.normalize()
+     *  console.assert(vec, new Vec2(1, 0))
+     */
+    normalize() {
+        const magnitude = this.length()
+        if (magnitude !== 0) this.div(magnitude)
+        return this
+    }
+
+    distance(target: Vec2) {
+        const dx = target.x - this.x
+        const dy = target.y - this.y
+
+        return Math.hypot(dx, dy)
+    }
+
+    /**
+     * @returns A deep copy of this vector
+     */
+    clone() {
+        return new Vec2(this.x, this.y)
+    }
 }
 
-export class Vec3 extends Vec2 {
+export class Vec3 {
+    x: number
+    y: number
     z: number
 
     constructor(x: number, y: number, z: number) {
-        super(x, y)
+        this.x = x
+        this.y = y
         this.z = z
     }
 
@@ -68,10 +139,27 @@ export class Vec3 extends Vec2 {
         return new Vec3(v, v, v)
     }
 
-    static empty() {
-        return new Vec3(0, 0, 0)
+    static zero() {
+        return Vec3.initial(0)
     }
 
+    static one() {
+        return Vec3.initial(1)
+    }
+
+    /**
+     * 
+     * @param value HEX string without the char '#'
+     * @example
+     *
+     * const white = Vec3.fromHex("ffffff");
+     * const black = Vec3.fromHex("000000");
+     * const blue = Vec3.fromHex("0000ff");
+     *
+     * console.assert(white, new Vec3(255, 255, 255))
+     * console.assert(black, new Vec3(0, 0, 0))
+     * console.assert(blue, new Vec3(0, 0, 255))
+     */
     static fromHex(value: string): Vec3 {
         return new Vec3(
             parseInt(value.slice(0, 2), 16),
@@ -109,6 +197,30 @@ export class Vec3 extends Vec2 {
         return this
     }
 
+    /**
+     * @returns Dot product of this vector
+     */
+    dot(other: Vec3) {
+        return this.x * other.x +
+            this.y * other.y +
+            this.z * other.z
+    }
+
+    /**
+     * `Vec3.cross` doesn't update for the current value.
+     * Instead returns the calculated value
+     */
+    cross(other: Vec3) {
+        return new Vec3(
+            this.y * other.z - this.z * other.y,
+            this.z * other.x - this.x * other.z,
+            this.x * other.y - this.y * other.x
+        )
+    }
+
+    /**
+     * `cb` applied to the `x`, `y` and `z`
+     */
     map(cb: (v: number) => number) {
         this.x = cb(this.x)
         this.y = cb(this.y)
@@ -117,6 +229,9 @@ export class Vec3 extends Vec2 {
         return this
     }
 
+    /**
+     * @returns \[`x`, `y`, `z`\]
+     */
     toArr(): [number, number, number] {
         return [
             this.x,
@@ -124,16 +239,49 @@ export class Vec3 extends Vec2 {
             this.z
         ]
     }
-}
 
-export type VertexPositionColorTexture = {
-    pos: Vec2,
-    color: Vec3,
-    uv: Vec2,
-    alpha: number
-}
+    /**
+     * @returns magnitude of the vector
+     */
+    length() {
+        return Math.hypot(this.x, this.y, this.z)
+    }
 
-export type VertexPositionColor = {
-    pos: Vec2,
-    color: Vec3,
+    /**
+     * Consider using this over `length` if you want faster calculations
+     * @returns squared magnitude of the vector
+     */
+    lengthSquared() {
+        return this.x * this.x +
+            this.y * this.y +
+            this.z * this.z
+    }
+
+    /**
+     * Normalizes the vector
+     * @example
+     *  const vec = new Vec3(5, 0, 0)
+     *  vec.normalize()
+     *  console.assert(vec, new Vec3(1, 0, 0))
+     */
+    normalize() {
+        const magnitude = this.length()
+        if (magnitude !== 0) this.div(magnitude)
+        return this
+    }
+
+    distance(target: Vec3) {
+        const dx = target.x - this.x
+        const dy = target.y - this.y
+        const dz = target.z - this.z
+
+        return Math.hypot(dx, dy, dz)
+    }
+
+    /**
+     * @returns A deep copy of this vector
+     */
+    clone() {
+        return new Vec3(this.x, this.y, this.z)
+    }
 }

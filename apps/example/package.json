@@ -12,7 +12,8 @@
     },
     "dependencies": {
         "@devrals/backdrops": "workspace:*",
-        "@devrals/webgl-engine": "workspace:*"
+        "@devrals/webgl-engine": "workspace:*",
+        "@devrals/math": "workspace:*"
     },
     "devDependencies": {
         "vite": "^8.0.12"

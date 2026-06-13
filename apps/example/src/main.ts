@@ -1,19 +1,18 @@
+import { Vec2 } from "@devrals/math";
 import "./style.css"
 
-import NorthernLights from "@devrals/backdrops/northern-lights"
-import { WebGlEngine } from "@devrals/webgl-engine"
+import FloatingInSpace from "@devrals/backdrops/floating-in-space";
 
 const appContainer = document.getElementById("app")!;
-const northern_lights = new NorthernLights()
+const floatingInSpaceEffect = new FloatingInSpace(50, new Vec2(0, 1000))
 let canvas: HTMLCanvasElement
-let engine: WebGlEngine;
-
+let ctx: CanvasRenderingContext2D;
 
 async function initContent() {
     const _canvas = document.createElement("canvas")
     _canvas.id = "background"
-    _canvas.width = NorthernLights.resolution.width
-    _canvas.height = NorthernLights.resolution.height
+    _canvas.width = FloatingInSpace.resolution.width
+    _canvas.height = FloatingInSpace.resolution.height
     _canvas.style.imageRendering = "pixelated"
     _canvas.style.width = "100vw"
     _canvas.style.height = "100vh"
@@ -30,16 +29,8 @@ async function initContent() {
     appContainer.append(canvas)
 }
 
-const DRAW_TIME = 1 / 10
 async function initEngine() {
-    engine = new WebGlEngine(canvas)
-    engine.fullscreenFrameBufferSettings = {
-        enabled: true,
-        resolution: NorthernLights.resolution
-    }
-    await engine.init()
-    await northern_lights.init(engine)
-
+    ctx = canvas.getContext("2d")!
 }
 
 async function init() {
@@ -50,18 +41,22 @@ async function init() {
 }
 
 
+let lastFrameTime = performance.now()
 let animationId: number;
 function render() {
-    engine.clearScreen()
-    engine.draw(DRAW_TIME, (dt) =>
-        northern_lights.draw(engine, dt))
+    const now = performance.now()
+    const dt = (now - lastFrameTime) / 100
+    lastFrameTime = now
+
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    floatingInSpaceEffect.update(dt)
+    floatingInSpaceEffect.draw(ctx)
+
     animationId = requestAnimationFrame(render)
 }
 
-function fatal(error: unknown): never {
+function fatal(error: unknown) {
     cancelAnimationFrame(animationId)
-    northern_lights.destroy(engine)
-    engine.destroyFrameBuffer()
     console.error(error)
 
     document.body.innerHTML = `

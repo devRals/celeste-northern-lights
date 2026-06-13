@@ -16,10 +16,10 @@ const SET_PER_TEXTURE_COUNT = 4
 const ColorTeal = Vec3.fromHex("00B2A9")
 
 export default class DreamStars implements Backdrop<CanvasRenderingContext2D> {
-    stars: Star[]
-    colors: Vec3[]
+    private stars: Star[]
+    private colors: Vec3[]
     dreaming = true
-    textures: Record<keyof typeof textureSets, ImageBitmap[][]> = {
+    private textures: Record<keyof typeof textureSets, ImageBitmap[][]> = {
         a: [], b: [], c: []
     }
 
@@ -30,7 +30,7 @@ export default class DreamStars implements Backdrop<CanvasRenderingContext2D> {
         height: 180
     }
 
-    constructor(count = 100) {
+    constructor(count = 100, dreamingColor?: Vec3) {
         this.stars = new Array(count)
         const { width, height } = DreamStars.resolution
 
@@ -44,8 +44,9 @@ export default class DreamStars implements Backdrop<CanvasRenderingContext2D> {
 
         this.colors = new Array(9)
         this.colors[0] = new Vec3(255, 255, 255)
+
+        const color = dreamingColor ?? new Vec3(ColorTeal.x, ColorTeal.y, ColorTeal.z)
         for (let i = 1; i < this.colors.length; i++) {
-            const color = new Vec3(ColorTeal.x, ColorTeal.y, ColorTeal.z)
 
             this.colors[i] = color.mul(0.7 * (1.0 - (i / this.colors.length)))
         }
