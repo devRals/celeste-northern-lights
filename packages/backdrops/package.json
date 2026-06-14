@@ -1,6 +1,6 @@
 {
     "name": "@devrals/backdrops",
-    "version": "0.2.2",
+    "version": "0.2.4",
     "type": "module",
     "packageManager": "pnpm@10.29.2",
     "license": "MIT",
@@ -36,9 +36,9 @@
             "types": "./dist/src/dream-stars/index.d.ts",
             "default": "./dist/dream-stars.js"
         },
-        "./floating-in-space": {
-            "types": "./dist/src/floating-in-space/index.d.ts",
-            "import": "./dist/floating-in-space.js"
+        "./among-us": {
+            "types": "./dist/src/AMOGUS/index.d.ts",
+            "default": "./dist/among-us.js"
         }
     }
 }

@@ -1,10 +1,10 @@
 import { Vec2 } from "@devrals/math";
 import "./style.css"
 
-import FloatingInSpace from "@devrals/backdrops/floating-in-space";
+import FloatingInSpace from "@devrals/backdrops/among-us"
 
 const appContainer = document.getElementById("app")!;
-const floatingInSpaceEffect = new FloatingInSpace(50, new Vec2(0, 1000))
+const AMOGUS_effects = new FloatingInSpace(50, new Vec2(1, 0))
 let canvas: HTMLCanvasElement
 let ctx: CanvasRenderingContext2D;
 
@@ -26,11 +26,16 @@ async function initContent() {
         console.error(event.reason)
     })
 
+    window.addEventListener("keydown", k => {
+        if (k.key === "i") console.info(AMOGUS_effects)
+    })
+
     appContainer.append(canvas)
 }
 
 async function initEngine() {
     ctx = canvas.getContext("2d")!
+    await AMOGUS_effects.init()
 }
 
 async function init() {
@@ -45,12 +50,12 @@ let lastFrameTime = performance.now()
 let animationId: number;
 function render() {
     const now = performance.now()
-    const dt = (now - lastFrameTime) / 100
+    const dt = (now - lastFrameTime) / 1000
     lastFrameTime = now
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-    floatingInSpaceEffect.update(dt)
-    floatingInSpaceEffect.draw(ctx)
+    AMOGUS_effects.update(dt)
+    AMOGUS_effects.draw(ctx)
 
     animationId = requestAnimationFrame(render)
 }

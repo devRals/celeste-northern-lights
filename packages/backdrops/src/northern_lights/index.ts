@@ -15,7 +15,7 @@ export default class NorthernLights implements Backdrop<WebGlEngine> {
     static resolution: Resolution = {
         width: 320,
         height: 180
-    }
+    } as const
 
     strands: Strand[]
     particles: Particle[]
